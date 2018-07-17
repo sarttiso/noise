@@ -1,0 +1,14 @@
+% This function generates confidence intervals for a pink noise process
+% paramterized by a coefficient and exponent specifying the power law for
+% the given process.
+%
+% IN:
+% A: power law exponent for pink noise process
+% C: power law coefficient for pink noise process
+%
+% OUT:
+
+function pinkconf()
+
+
+end
