@@ -15,7 +15,7 @@ parser = inputParser;
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 addRequired(parser,'a',validScalarPosNum)
 addOptional(parser,'ncoeff',50,validScalarPosNum)
-parser(parser,a,varargin{:})
+parse(parser,a,varargin{:})
 
 a = parser.Results.a;
 ncoeff = parser.Results.ncoeff;

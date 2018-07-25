@@ -46,9 +46,11 @@ psd = pinkpsd();
 obj = @(x0) sum( abs( log(psd(x0(1),x0(2),f))- log(pxx) ) );
 % formulate constraints: A <= 2, A >= 0, C >= 0
 lb = [0;0]; % lower bounds
-ub = 2;   % upper bound (on A only)
+ub = [2,Inf];   % upper bound (on A only)
+% options
+options = optimoptions('fmincon','Display','none');
 % look for optimal A,C starting at A0,C0
-X = fmincon(obj,[A0;C0],[],[],[],[],lb,ub);
+X = fmincon(obj,[A0;C0],[],[],[],[],lb,ub,[],options);
 A = X(1);
 C = X(2:end);
 
