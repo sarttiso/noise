@@ -28,6 +28,10 @@ pxx = parser.Results.pxx;
 A0  = parser.Results.A0;
 C0 = parser.Results.C0;
 
+% make columns
+pxx = pxx(:);
+f = f(:);
+
 % ignore zero frequency
 idx = f~=0;
 f = f(idx);
