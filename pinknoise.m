@@ -22,7 +22,7 @@ validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 addRequired(parser,'a',@(a) a > 0 && a < 2)
 addRequired(parser,'nsample',validScalarPosNum)
 addParameter(parser,'ntrial',1,validScalarPosNum)
-addParameter(parser,'ncoeff',50,validScalarPosNum)
+addParameter(parser,'ncoeff',200,validScalarPosNum)
 addParameter(parser,'var',1,validScalarPosNum)
 parse(parser,a,nsample,varargin{:})
 

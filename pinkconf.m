@@ -14,6 +14,9 @@
 % 'nsample': number of data points for simulated time series (default 1000)
 % 'dt': sample spacing (default 1)
 % 'nw': time half-bandwidth product for multi-taper estimates (default 2)
+% 'estimator': which spectral estimator to use when constructing confidence
+%   intervals. Either 'pmtm' or 'pchave' (default 'pmtm'). When using
+%   pchave, the 'dpss' window is chosen by default.
 %
 % OUT:
 % CI: confidence interval(s) corresponding to requested percentiles,
@@ -21,7 +24,7 @@
 % w: frequency axis for the confidence intervals
 %
 % TO DO:
-% - allow for other spectral estimators
+% - allow for various windows when using pchave
 %
 % Adrian Tasistro-Hart, adrianraph-at-gmail.com, 25.07.2018
 
@@ -36,7 +39,7 @@ addParameter(parser,'ntrial',1000,validScalarPosNum);
 addParameter(parser,'conf',95,@(x) all([x(:) > 0; x(:) < 100]));
 addParameter(parser,'dt',1,@isscalar);
 addParameter(parser,'nw',2,@isscalar);
-% addParameter(parser,'estimator','pmtm',@ischar);
+addParameter(parser,'estimator','pmtm',@ischar);
 
 parse(parser,A,var,varargin{:});
     
@@ -47,12 +50,28 @@ nt     = parser.Results.ntrial;
 conf   = parser.Results.conf;
 dt     = parser.Results.dt;
 nw     = parser.Results.nw;
+est    = parser.Results.estimator;
 
-% generate t pink noise instances
-ts = pinknoise(A,n,'ntrial',nt,'ncoeff',500,'var',varnce);
+% validate estimator
+est = validatestring(est,{'pmtm','pchave'});
 
 % compute their power spectral densities
-[pxx,w] = pmtm(ts,nw,n,1/dt);
+switch est
+    case 'pmtm'
+        % generate t pink noise instances
+        ts = pinknoise(A,n,'ntrial',nt,'ncoeff',1000,'var',varnce);
+        [pxx,w] = pmtm(ts,nw,n,1/dt);
+    case 'pchave'
+        % generate t pink noise instances, but need to make slightly longer
+        % so that we can have overlap in pchave
+        ts = pinknoise(A,round(1.5*n),'ntrial',nt,'ncoeff',1000,...
+            'var',varnce);
+        pxx = zeros(n+1,nt);
+        for ii = 1:nt
+            tscell = {ts(:,ii)};
+            [pxx(:,ii),w] = pchave({tscell{:}},n,95,2*n,1/dt,[],'dpss',nw);
+        end
+end
 
 % get requested percentiles
 CI = prctile(pxx',conf);

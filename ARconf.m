@@ -12,6 +12,8 @@
 % 'n': number of data points to output. 
 % 'dt': sample spacing
 % 'estimator': 'pmtm' (default) or 'pchave'
+% 
+% Adrian Tasistro-Hart, adrianraph-at-gmail.com, 01.08.2018
 function [C,w] = ARconf(rho,e,varargin)
 
 parser = inputParser;

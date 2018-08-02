@@ -7,8 +7,9 @@
 % f: frequency axis of time series
 % pxx: power spectral density estimate
 % fn: Nyquist frequency of time series
-% S0 (optional): estimate of innovations variance
-% rho0 (optional): estimate of lag coefficient(s)
+% S0 (optional): estimate of innovations variance, random by default
+% rho0 (optional): estimate of lag coefficient(s), computed by invfreqz by
+%   default
 %
 % OUT:
 % rho: optimal lag coefficient(s)
@@ -37,10 +38,13 @@ function [rho,S] = ARfit(p,f,pxx,fn,varargin)
     
     % generate initial guess for fminsearch
     if isempty(rho0)
-        rho0 = 0.6*rand(p,1);
+        [~,rho0] = invfreqz(sqrt(pxx),linspace(0,pi,length(f)),0,p);
     else
         assert(length(rho0) == p,'rho0 must be of length equal to p')
     end
+    
+    % ensure rho0 is column
+    rho0 = rho0(:);
 
     % get functional form of AR(p) power spectral density
     psd = ARpsd(p);
