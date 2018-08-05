@@ -17,6 +17,7 @@
 % 'estimator': which spectral estimator to use when constructing confidence
 %   intervals. Either 'pmtm' or 'pchave' (default 'pmtm'). When using
 %   pchave, the 'dpss' window is chosen by default.
+% 'window': window size for pchave estimation; must be smaller than nsample
 %
 % OUT:
 % CI: confidence interval(s) corresponding to requested percentiles,
@@ -24,9 +25,9 @@
 % w: frequency axis for the confidence intervals
 %
 % TO DO:
-% - allow for various windows when using pchave
+% [x] allow for various windows when using pchave
 %
-% Adrian Tasistro-Hart, adrianraph-at-gmail.com, 25.07.2018
+% Adrian Tasistro-Hart, adrianraph-at-gmail.com, 05.08.2018
 
 function [CI,w] = pinkconf(A,var,varargin)
 
@@ -40,6 +41,7 @@ addParameter(parser,'conf',95,@(x) all([x(:) > 0; x(:) < 100]));
 addParameter(parser,'dt',1,@isscalar);
 addParameter(parser,'nw',2,@isscalar);
 addParameter(parser,'estimator','pmtm',@ischar);
+addParameter(parser,'window',[],@isnumeric);
 
 parse(parser,A,var,varargin{:});
     
@@ -51,9 +53,19 @@ conf   = parser.Results.conf;
 dt     = parser.Results.dt;
 nw     = parser.Results.nw;
 est    = parser.Results.estimator;
+win    = parser.Results.window;
 
 % validate estimator
 est = validatestring(est,{'pmtm','pchave'});
+% validate window size if using pchave
+if strcmp(est,'pchave')
+   assert(~isempty(win),...
+       'must specify window size when using pchave estimation')
+   assert(win < n,...
+       'window must be smaller than number of samples')
+   % make sure win is an integer
+   win = round(win);
+end
 
 % compute their power spectral densities
 switch est
@@ -64,12 +76,14 @@ switch est
     case 'pchave'
         % generate t pink noise instances, but need to make slightly longer
         % so that we can have overlap in pchave
-        ts = pinknoise(A,round(1.5*n),'ntrial',nt,'ncoeff',1000,...
+        ts = pinknoise(A,n,'ntrial',1,'ncoeff',1000,...
             'var',varnce);
+        [~,w] = pchave({ts},win,95,2*n,1/dt,[],'dpss',nw);
         pxx = zeros(n+1,nt);
-        for ii = 1:nt
-            tscell = {ts(:,ii)};
-            [pxx(:,ii),w] = pchave({tscell{:}},n,95,2*n,1/dt,[],'dpss',nw);
+        parfor ii = 1:nt
+            ts = pinknoise(A,n,'ntrial',1,'ncoeff',1000,'var',varnce);
+            tscell = num2cell(ts,1);
+            [pxx(:,ii)] = pchave(tscell,win,95,2*n,1/dt,[],'dpss',nw);
         end
 end
 
