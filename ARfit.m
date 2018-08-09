@@ -38,18 +38,24 @@ function [rho,S] = ARfit(p,f,pxx,fn,varargin)
     
     % generate initial guess for fminsearch
     if isempty(rho0)
-        [~,rho0] = invfreqz(sqrt(pxx),linspace(0,pi,length(f)),0,p);
+        [~,rho0] = invfreqz(sqrt(pxx),linspace(0,pi,length(f)),0,p,[],100);
+        rho0 = -rho0(2:end);
     else
         assert(length(rho0) == p,'rho0 must be of length equal to p')
     end
     
     % ensure rho0 is column
     rho0 = rho0(:);
+    
+    % ignore zero frequency
+    idx = f~=0;
+    f = f(idx);
+    pxx = pxx(idx);
 
     % get functional form of AR(p) power spectral density
     psd = ARpsd(p);
     % generate objective function
-    obj = @(x0) sum( abs( log(psd(x0(1),x0(2:end),f,fn))- log(pxx) ) );
+    obj = @(x0) sum( (1./sqrt(f)) .* abs( log(psd(x0(1),x0(2:end),f,fn))- log(pxx) ) );
     % look for optimal S, rho starting at S0, rho0
 %     opt = optimset('MaxFunEvals',600*p,'MaxIter',600*p);
     nonlcon = @lagroots; 

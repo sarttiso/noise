@@ -76,8 +76,7 @@ switch est
     case 'pchave'
         % generate t pink noise instances, but need to make slightly longer
         % so that we can have overlap in pchave
-        ts = pinknoise(A,n,'ntrial',1,'ncoeff',1000,...
-            'var',varnce);
+        ts = pinknoise(A,n,'ntrial',1,'ncoeff',1000,'var',varnce);
         [~,w] = pchave({ts},win,95,2*n,1/dt,[],'dpss',nw);
         pxx = zeros(n+1,nt);
         parfor ii = 1:nt

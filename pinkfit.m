@@ -43,7 +43,7 @@ assert(length(f) == length(pxx),'f and pxx must be same length')
 % get functional form of pink noise power spectral density
 psd = pinkpsd();
 % generate objective function
-obj = @(x0) sum( abs( log(psd(x0(1),x0(2),f))- log(pxx) ) );
+obj = @(x0) sum( (1./sqrt(f)) .* abs( log(psd(x0(1),x0(2),f)) - log(pxx) ) );
 % formulate constraints: A <= 2, A >= 0, C >= 0
 lb = [0;0]; % lower bounds
 ub = [2,Inf];   % upper bound (on A only)
