@@ -21,7 +21,7 @@ function [rho,S] = ARfit(p,f,pxx,fn,varargin)
     addRequired(parser,'f',@isnumeric)
     addRequired(parser,'pxx',@isnumeric)
     addRequired(parser,'fn',@isscalar)
-    addParameter(parser,'S0',rand,@isscalar)
+    addParameter(parser,'S0',[],@isnumeric)
     addParameter(parser,'rho0',[],@isnumeric)
     
     % parse inputs
@@ -36,12 +36,19 @@ function [rho,S] = ARfit(p,f,pxx,fn,varargin)
     % make sure that given frequencies are of same length as psd of data
     assert(length(f) == length(pxx),'f and pxx must be same length')
     
-    % generate initial guess for fminsearch
+    % generate initial guess for rho for fminsearch
     if isempty(rho0)
         [~,rho0] = invfreqz(sqrt(pxx),linspace(0,pi,length(f)),0,p,[],100);
         rho0 = -rho0(2:end);
     else
         assert(length(rho0) == p,'rho0 must be of length equal to p')
+    end
+    
+    % generate initial guess for S0 for fminsearch
+    if isempty(S0)
+        S0 = sum(pxx)*mean(diff(f)); % make variance of process
+    else
+        assert(length(S0) == 1,'S0 must be a single value')
     end
     
     % ensure rho0 is column
