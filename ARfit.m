@@ -73,6 +73,9 @@ function [rho,S] = ARfit(p,f,pxx,fn,varargin)
     
     
     %% nonlinear constraint function for fmincon
+    % from pg 392, Percival and Walden. I impose the constraint that the
+    % roots lie outside the unit circle, so that subtracting them from 1
+    % imposes non-positivity, which is what matlab's nonlincon can achieve
     function [c,ceq] = lagroots(x)
         c = 1 - abs(roots([flipud(-x(2:end));1]));
         ceq = [];
