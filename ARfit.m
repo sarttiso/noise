@@ -62,7 +62,7 @@ function [rho,S] = ARfit(p,f,pxx,fn,varargin)
     % get functional form of AR(p) power spectral density
     psd = ARpsd(p);
     % generate objective function
-    obj = @(x0) sum( (1./sqrt(f)) .* abs( log(psd(x0(1),x0(2:end),f,fn))- log(pxx) ) );
+    obj = @(x0) sum( (1./(f).^(1/2)) .* abs( log(psd(x0(1),x0(2:end),f,fn))- log(pxx) ) );
     % look for optimal S, rho starting at S0, rho0
 %     opt = optimset('MaxFunEvals',600*p,'MaxIter',600*p);
     nonlcon = @lagroots; 
@@ -74,7 +74,7 @@ function [rho,S] = ARfit(p,f,pxx,fn,varargin)
     
     %% nonlinear constraint function for fmincon
     function [c,ceq] = lagroots(x)
-        c = 1 - abs(roots([-x(2:end);1]));
+        c = 1 - abs(roots([flipud(-x(2:end));1]));
         ceq = [];
     end
 
