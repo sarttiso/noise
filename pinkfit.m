@@ -8,10 +8,16 @@
 % pxx: power spectral density estimate
 % A0 (optional): estimate of noise exponent
 % C0 (optional): estimate of power law coefficient
+% 'weights': (default 1/sqrt(f)) apply weighting when computing the
+%   best-fitting AR(p) spectrum. weights must be of equal length to f, pxx
 %
 % OUT:
 % A: optimal pink noise exponent
 % C: optimal power law coefficient
+%
+% TO DO:
+%
+% Adrian Tasistro-Hart, adrianraph-at-gmail.com, 20.08.2018
 
 function [A,C] = pinkfit(f,pxx,varargin)
 
@@ -20,6 +26,7 @@ addRequired(parser,'f',@isnumeric)
 addRequired(parser,'pxx',@isnumeric)
 addParameter(parser,'A0',1,@isscalar)
 addParameter(parser,'C0',1,@isscalar)
+addParameter(parser,'weights',1./sqrt(f),@isnumeric)
 
 % parse inputs
 parse(parser,f,pxx,varargin{:});
@@ -27,6 +34,7 @@ f   = parser.Results.f;
 pxx = parser.Results.pxx;
 A0  = parser.Results.A0;
 C0 = parser.Results.C0;
+wghts = parser.Results.weights;
 
 % make columns
 pxx = pxx(:);
@@ -43,7 +51,7 @@ assert(length(f) == length(pxx),'f and pxx must be same length')
 % get functional form of pink noise power spectral density
 psd = pinkpsd();
 % generate objective function
-obj = @(x0) sum( (1./sqrt(f)) .* abs( log(psd(x0(1),x0(2),f)) - log(pxx) ) );
+obj = @(x0) sum( wghts.*abs( log(psd(x0(1),x0(2),f)) - log(pxx) ) );
 % formulate constraints: A <= 2, A >= 0, C >= 0
 lb = [0;0]; % lower bounds
 ub = [2,Inf];   % upper bound (on A only)
