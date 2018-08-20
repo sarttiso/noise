@@ -33,7 +33,7 @@ function [CI,w] = pinkconf(A,var,varargin)
 
 parser = inputParser;
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(parser,'A',@(a) a > 0 && a < 2);
+addRequired(parser,'A',@(a) a >= 0 && a <= 2);
 addRequired(parser,'var',validScalarPosNum)
 addParameter(parser,'nsample',1000,validScalarPosNum);
 addParameter(parser,'ntrial',1000,validScalarPosNum);
@@ -71,12 +71,12 @@ end
 switch est
     case 'pmtm'
         % generate t pink noise instances
-        ts = pinknoise(A,n,'ntrial',nt,'ncoeff',1000,'var',varnce);
+        ts = pinknoise(A,n,'ntrial',nt,'ncoeff',500,'var',varnce);
         [pxx,w] = pmtm(ts,nw,n,1/dt);
     case 'pchave'
         % generate t pink noise instances, but need to make slightly longer
         % so that we can have overlap in pchave
-        ts = pinknoise(A,n,'ntrial',1,'ncoeff',1000,'var',varnce);
+        ts = pinknoise(A,n,'ntrial',1,'ncoeff',500,'var',varnce);
         [~,w] = pchave({ts},win,95,2*n,1/dt,[],'dpss',nw);
         pxx = zeros(n+1,nt);
         parfor ii = 1:nt

@@ -6,7 +6,7 @@
 % a: exponent of pink noise, goes from 0 to 2
 % nsample: number of samples for simulated time series
 % 'ntrial': number of time series to simulate (default 1)
-% 'ncoeff': number of coefficients in filter for time series (default 50)
+% 'ncoeff': number of coefficients in filter for time series (default 100)
 % 'var': variance for the time series to achieve, (default 1)
 %
 % OUT:
@@ -19,10 +19,10 @@ function ts = pinknoise(a,nsample,varargin)
 
 parser = inputParser;
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(parser,'a',@(a) a > 0 && a < 2)
+addRequired(parser,'a',@(a) a >= 0 && a <= 2)
 addRequired(parser,'nsample',validScalarPosNum)
 addParameter(parser,'ntrial',1,validScalarPosNum)
-addParameter(parser,'ncoeff',200,validScalarPosNum)
+addParameter(parser,'ncoeff',100,validScalarPosNum)
 addParameter(parser,'var',1,validScalarPosNum)
 parse(parser,a,nsample,varargin{:})
 

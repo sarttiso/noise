@@ -13,7 +13,7 @@ function b = pinkcoeff(a,varargin)
 
 parser = inputParser;
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(parser,'a',validScalarPosNum)
+addRequired(parser,'a',@(a) a >= 0 && a <= 2)
 addOptional(parser,'ncoeff',50,validScalarPosNum)
 parse(parser,a,varargin{:})
 
