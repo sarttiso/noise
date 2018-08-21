@@ -44,6 +44,7 @@ f = f(:);
 idx = f~=0;
 f = f(idx);
 pxx = pxx(idx);
+wghts = wghts(idx);
 
 % make sure that given frequencies are of same length as psd of data
 assert(length(f) == length(pxx),'f and pxx must be same length')
