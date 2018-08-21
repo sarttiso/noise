@@ -16,7 +16,8 @@
 %   moving average 'ma' or autoregressive 'ar'
 %
 % OUT:
-% a: filter coefficients
+% a: filter coefficients, will be ncoeff+1 long because the first entry is
+%   always equal to one
 %
 % TO DO:
 %
@@ -41,14 +42,14 @@ filttype = parser.Results.filter;
 filttype = validatestring(filttype,{'ma','ar'});
 
 % generate coefficients
-a = ones(ncoeff,1);
+a = ones(ncoeff+1,1);
 switch filttype
     case 'ar'
-        for ii = 1:ncoeff-1
+        for ii = 1:ncoeff
             a(ii+1) = (ii - 1 - A/2)*(a(ii)/ii);
         end
     case 'ma'
-        for ii = 1:ncoeff-1
+        for ii = 1:ncoeff
             a(ii+1) = (A/2 + ii - 1)*(a(ii)/ii);
         end
 end
