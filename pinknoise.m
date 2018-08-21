@@ -15,27 +15,27 @@
 % 
 % Adrian Tasistro-Hart, adrianraph-at-gmail.com, 25.07.2018
 
-function ts = pinknoise(a,nsample,varargin)
+function ts = pinknoise(A,nsample,varargin)
 
 parser = inputParser;
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(parser,'a',@(a) a >= 0 && a <= 2)
+addRequired(parser,'A',@(A) A >= 0 && A <= 2)
 addRequired(parser,'nsample',validScalarPosNum)
 addParameter(parser,'ntrial',1,validScalarPosNum)
 addParameter(parser,'ncoeff',100,validScalarPosNum)
 addParameter(parser,'var',1,validScalarPosNum)
-parse(parser,a,nsample,varargin{:})
+parse(parser,A,nsample,varargin{:})
 
-a = parser.Results.a;
+A = parser.Results.A;
 nsample = parser.Results.nsample;
 nt = parser.Results.ntrial;
 ncoeff = parser.Results.ncoeff;
 varnce = parser.Results.var;
 
 % generate white noise
-x = wgn(nsample+10*ncoeff,nt,1);
-% get coefficients
-b = pinkcoeff(a,ncoeff);
+x = randn(nsample+10*ncoeff,nt);
+% get coefficients, use moving average filter
+b = pinkcoeff(A,ncoeff,'filter','ma');
 % filter white noise
 ts = filter(b,1,x);
 ts = ts(end-nsample+1:end,:);
