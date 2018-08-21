@@ -71,6 +71,7 @@ rho0 = rho0(:);
 idx = f~=0;
 f = f(idx);
 pxx = pxx(idx);
+wghts = wghts(idx);
 
 % get functional form of AR(p) power spectral density
 psd = ARpsd(p);
@@ -78,8 +79,13 @@ psd = ARpsd(p);
 obj = @(x0) sum( wghts.*abs( log(psd(x0(1),x0(2:end),f,fn))- log(pxx) ) );
 % look for optimal S, rho starting at S0, rho0
 %     opt = optimset('MaxFunEvals',600*p,'MaxIter',600*p);
+% linear inequality matrix imposing non-negativity of innovations variance
+A = sparse(zeros(1,p+1));
+A(1,1) = -1;
+b = 0;
+
 nonlcon = @lagroots; 
-X = fmincon(obj,[S0;rho0],[],[],[],[],...
+X = fmincon(obj,[S0;rho0],A,b,[],[],...
     [],[],nonlcon);
 S = X(1);
 rho = X(2:end); 
