@@ -1,28 +1,54 @@
-% This function returns the coefficients for a moving average filter that
-% operates on white gaussian noise to generate pink noise, as described by
-% Kasdin 1995, pg 821, eq 103. the pink noise will have a power law slope
-% of -a (so a is positive as input)
+% This function returns the coefficients for a digital filter that operates
+% on white gaussian noise to generate pink noise, as described by Kasdin
+% 1995. The user can choose whether to use a moving average (MA) filter,
+% with coefficients computed by eq. 103-104 (pg. 821) or an autoregressive
+% (AR) filter, with coefficients computed by eq. 116 (pg. 822).
+% Autoregressive filter coefficients are returned by default, which can be
+% fed to matlab's filter function as the second argument (the moving
+% average coefficients would then be the first argument).
+% The pink noise will have a power law slope of -a (so a is positive as 
+% input).
 %
 % IN:
-% ncoeff: number of coefficients to generate (default 50)
+% A: power law coefficient ([0,2])
+% 'ncoeff': (default 50) number of coefficients to generate 
+% 'filter': (default 'ar') type of filter coefficients to generate, either
+%   moving average 'ma' or autoregressive 'ar'
 %
 % OUT:
-% b: filter coefficients
+% a: filter coefficients
+%
+% TO DO:
+%
+%
+% Adrian Tasistro-Hart, adrianraph-at-gmail.com, 21.08.2018
 
-function b = pinkcoeff(a,varargin)
+function a = pinkcoeff(A,varargin)
 
+% parse inputs
 parser = inputParser;
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(parser,'a',@(a) a >= 0 && a <= 2)
+addRequired(parser,'A',@(A) A >= 0 && A <= 2)
 addOptional(parser,'ncoeff',50,validScalarPosNum)
-parse(parser,a,varargin{:})
+addParameter(parser,'filter','ar',@ischar)
+parse(parser,A,varargin{:})
 
-a = parser.Results.a;
+A = parser.Results.A;
 ncoeff = parser.Results.ncoeff;
+filttype = parser.Results.filter;
 
-b = ones(ncoeff,1);
-for ii = 1:ncoeff-1
-    b(ii+1) = (a/2 + ii - 1)*(b(ii)/ii);
-end
+% validate filter
+filttype = validatestring(filttype,{'ma','ar'});
 
+% generate coefficients
+a = ones(ncoeff,1);
+switch filttype
+    case 'ar'
+        for ii = 1:ncoeff-1
+            a(ii+1) = (ii - 1 - A/2)*(a(ii)/ii);
+        end
+    case 'ma'
+        for ii = 1:ncoeff-1
+            a(ii+1) = (A/2 + ii - 1)*(a(ii)/ii);
+        end
 end
