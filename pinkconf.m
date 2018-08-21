@@ -29,7 +29,7 @@
 %
 % Adrian Tasistro-Hart, adrianraph-at-gmail.com, 05.08.2018
 
-function [CI,w] = pinkconf(A,var,varargin)
+function [CI,w] = pinkconf(A,varnce,varargin)
 
 parser = inputParser;
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
@@ -43,7 +43,7 @@ addParameter(parser,'nw',2,@isscalar);
 addParameter(parser,'estimator','pmtm',@ischar);
 addParameter(parser,'window',[],@isnumeric);
 
-parse(parser,A,var,varargin{:});
+parse(parser,A,varnce,varargin{:});
     
 A      = parser.Results.A;
 varnce = parser.Results.var;
@@ -72,7 +72,7 @@ switch est
     case 'pmtm'
         % generate t pink noise instances
         ts = pinknoise(A,n,'ntrial',nt,'ncoeff',500,'var',varnce);
-        [pxx,w] = pmtm(ts,nw,n,1/dt);
+        [pxx,w] = pmtm(detrend(ts),nw,n,1/dt);
     case 'pchave'
         % generate t pink noise instances, but need to make slightly longer
         % so that we can have overlap in pchave
@@ -81,11 +81,13 @@ switch est
         pxx = zeros(n+1,nt);
         parfor ii = 1:nt
             ts = pinknoise(A,n,'ntrial',1,'ncoeff',1000,'var',varnce);
-            tscell = num2cell(ts,1);
+            tscell = num2cell(detrend(ts),1);
             [pxx(:,ii)] = pchave(tscell,win,95,2*n,1/dt,[],'dpss',nw);
         end
 end
 
+% now also impose variance on spectra
+pxx = bsxfun(@times,pxx,varnce./sum(pxx)/mean(diff(w)));
 % get requested percentiles
 CI = prctile(pxx',conf);
 
