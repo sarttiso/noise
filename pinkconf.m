@@ -56,7 +56,7 @@ est    = parser.Results.estimator;
 win    = parser.Results.window;
 
 % validate estimator
-est = validatestring(est,{'pmtm','pchave'});
+est = validatestring(est,{'pmtm','pchave','plomb'});
 % validate window size if using pchave
 if strcmp(est,'pchave')
    assert(~isempty(win),...
@@ -84,6 +84,9 @@ switch est
             tscell = num2cell(detrend(ts),1);
             [pxx(:,ii)] = pchave(tscell,win,95,2*n,1/dt,[],'dpss',nw);
         end
+    case 'plomb'
+        ts = pinknoise(A,n,'ntrial',nt,'ncoeff',500,'var',varnce);
+        [pxx,w] = plomb(detrend(ts),dt*linspace(0,n-1,n));
 end
 
 % now also impose variance on spectra
