@@ -15,8 +15,8 @@
 % 'dt': sample spacing (default 1)
 % 'nw': time half-bandwidth product for multi-taper estimates (default 2)
 % 'estimator': which spectral estimator to use when constructing confidence
-%   intervals. Either 'pmtm' or 'pchave' (default 'pmtm'). When using
-%   pchave, the 'dpss' window is chosen by default.
+%   intervals. Either 'pmtm', 'pchave', or 'plomb' (default 'pmtm'). When 
+%   using pchave, the 'dpss' window is chosen by default.
 % 'window': window size for pchave estimation; must be smaller than nsample
 %
 % OUT:
@@ -90,7 +90,7 @@ switch est
 end
 
 % now also impose variance on spectra
-pxx = bsxfun(@times,pxx,varnce./sum(pxx)/mean(diff(w)));
+% pxx = bsxfun(@times,pxx,varnce./sum(pxx)/mean(diff(w)));
 % get requested percentiles
 CI = prctile(pxx',conf);
 

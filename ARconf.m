@@ -15,7 +15,7 @@
 % 'nsample': number of data points for simulated time series (default
 %   1000)
 % 'dt': sample spacing
-% 'estimator': 'pmtm' (default) or 'pchave'
+% 'estimator': 'pmtm' (default), 'pchave', or 'plomb'
 % 'nw': time half-bandwidth product for spectral estimates (default 2)
 %
 % OUT:
@@ -51,7 +51,7 @@ nw     = parser.Results.nw;
 est    = parser.Results.estimator;
 
 % validate estimator
-est = validatestring(est,{'pmtm','pchave'});
+est = validatestring(est,{'pmtm','pchave','plomb'});
 
 % create AR(p) model
 arm = arima('Constant',0,'AR',a,'Variance',e);
@@ -68,14 +68,18 @@ if ~isempty(varnce)
 end
 
 % PSDs of noise
-if strcmp(est,'pmtm')
-    [pxx,wc] = pmtm(ts,nw,n,1/dt);
-elseif strcmp(est,'pchave')
-    ts = num2cell(ts,1);
-    pxx = zeros(floor(n/2)+1,nt);
-    for j = 1:nt
-        [pxx(:,j),wc] = pchave(ts{j},floor(n/4),80,n,1/dt,[],'dpss',nw);
-    end
+switch est
+    case 'pmtm'
+        [pxx,wc] = pmtm(ts,nw,n,1/dt);
+    case 'pchave'
+        ts = num2cell(ts,1);
+        pxx = zeros(floor(n/2)+1,nt);
+        for j = 1:nt
+            [pxx(:,j),wc] = pchave(ts{j},floor(n/4),80,n,1/dt,[],...
+                'dpss',nw);
+        end
+    case 'plomb'
+        [pxx,wc] = plomb(ts,1/dt);
 end
 
 % get intervals
